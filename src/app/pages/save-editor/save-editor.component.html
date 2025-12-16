@@ -1,0 +1,698 @@
+<div class="page">
+  <header class="hero">
+    <div>
+      <p class="eyebrow">RPG Maker MV / .rpgsave</p>
+      <h1>RPG Save Editor &amp; Patcher</h1>
+      <p class="lede">
+        Load a save, tweak party stats, items, and actors, then export a patched
+        <code>.rpgsave</code> back to disk. All parsing happens in your browser.
+      </p>
+      <div class="file-grid">
+        <label class="upload">
+          <span>Select .rpgsave</span>
+          <input type="file" accept=".rpgsave,.txt" (change)="onSaveFileSelected($event)" />
+        </label>
+        <label class="upload">
+          <span>Import save from JSON</span>
+          <input type="file" accept=".json" (change)="onSaveJsonSelected($event)" />
+        </label>
+      </div>
+      <div class="data-dir">
+        <div class="toggle-row">
+          <label class="check">
+            <input type="checkbox" [ngModel]="importItems()" (ngModelChange)="importItems.set(!!$event)" />
+            <span>Items.json</span>
+          </label>
+          <label class="check">
+            <input type="checkbox" [ngModel]="importWeapons()" (ngModelChange)="importWeapons.set(!!$event)" />
+            <span>Weapons.json</span>
+          </label>
+          <label class="check">
+            <input type="checkbox" [ngModel]="importArmors()" (ngModelChange)="importArmors.set(!!$event)" />
+            <span>Armors.json</span>
+          </label>
+          <label class="check">
+            <input type="checkbox" [ngModel]="importSkills()" (ngModelChange)="importSkills.set(!!$event)" />
+            <span>Skills.json</span>
+          </label>
+          <label class="check">
+            <input type="checkbox" [ngModel]="importSystem()" (ngModelChange)="importSystem.set(!!$event)" />
+            <span>System.json</span>
+          </label>
+        </div>
+        <label class="upload wide">
+          <span>Import www/data folder</span>
+          <input type="file" webkitdirectory multiple (change)="onDataDirSelected($event)" />
+        </label>
+        @if (dataDirLabel()) {
+          <p class="status ghost">Folder: {{ dataDirLabel() }}</p>
+        }
+        @if (dataDirStatus()) {
+          <p class="status ghost">{{ dataDirStatus() }}</p>
+        }
+      </div>
+      <div class="sample-actions">
+        <button class="ghost" type="button" (click)="loadSampleData()">Load sample data</button>
+        <button class="ghost" type="button" (click)="clearData()">Clear data</button>
+      </div>
+      @if (fileLabel()) {
+        <p class="status success">Loaded {{ fileLabel() }}</p>
+      }
+      @if (error()) {
+        <p class="status error">{{ error() }}</p>
+      }
+    </div>
+    <div class="cta-stack">
+      <button class="cta" type="button" [disabled]="!save()" (click)="downloadSave()">
+        Download updated .rpgsave file
+      </button>
+      <button class="ghost" type="button" [disabled]="!save()" (click)="downloadRawJson()">
+        Download updated raw JSON
+      </button>
+    </div>
+  </header>
+
+  @if (save()) {
+    <section class="panel raw-panel">
+      <div
+        class="panel-head"
+        (click)="isRawOpen.set(!isRawOpen())"
+        style="cursor: pointer"
+      >
+        <div>
+          <p class="eyebrow">Advanced</p>
+          <h2>
+            <span class="chevron">{{ isRawOpen() ? '▼' : '▶' }}</span>
+            Raw JSON editor
+          </h2>
+        </div>
+        <div (click)="$event.stopPropagation()">
+          <label class="check">
+            <input type="checkbox" [ngModel]="showRaw()" (ngModelChange)="showRaw.set(!!$event)" />
+            <span>Show raw JSON</span>
+          </label>
+        </div>
+      </div>
+      @if (isRawOpen()) {
+        <div class="raw-toolbar">
+          <p class="status ghost">Double-click a value to edit. Numbers, booleans, null, and objects are parsed.</p>
+          <button type="button" class="ghost" (click)="downloadRawJson()">Download raw JSON</button>
+        </div>
+        @if (showRaw()) {
+          @if (rawRoot(); as root) {
+            <div class="raw-tree">
+              <ng-container *ngTemplateOutlet="rawNode; context: { $implicit: root }"></ng-container>
+            </div>
+          } @else {
+            <p class="status ghost">No save data loaded yet.</p>
+          }
+        }
+        <ng-template #rawNode let-node>
+          <details [open]="node.path.length === 0">
+            <summary>
+              <span class="node-key">{{ node.key }}</span>
+              @if (!node.isPrimitive) {
+                <span class="node-type">{{ node.isArray ? '[ ]' : '{ }' }}</span>
+              } @else {
+                <span class="node-value" (dblclick)="startEdit(node)">
+                  @if (isEditing(node)) {
+                    <input
+                      type="text"
+                      [ngModel]="editingValue()"
+                      (ngModelChange)="editingValue.set($event)"
+                      (keyup.enter)="commitEdit(node)"
+                      (keyup.escape)="cancelEdit()"
+                      (blur)="commitEdit(node)"
+                    />
+                  } @else {
+                    {{ formatValue(node.value) }}
+                  }
+                </span>
+              }
+            </summary>
+            @if (node.children.length) {
+              <div class="children">
+                @for (child of node.children; track trackNode(child)) {
+                  <ng-container *ngTemplateOutlet="rawNode; context: { $implicit: child }"></ng-container>
+                }
+              </div>
+            }
+          </details>
+        </ng-template>
+      }
+    </section>
+
+    <section class="panel">
+      <div
+        class="panel-head"
+        (click)="isEconomyOpen.set(!isEconomyOpen())"
+        style="cursor: pointer"
+      >
+        <div>
+          <p class="eyebrow">Party</p>
+          <h2>
+            <span class="chevron">{{ isEconomyOpen() ? '▼' : '▶' }}</span>
+            Economy
+          </h2>
+        </div>
+        <div class="pill">Steps: {{ steps() }}</div>
+      </div>
+      @if (isEconomyOpen()) {
+        <div class="controls-row">
+          <div>
+            <label>Gold</label>
+            <input
+              type="number"
+              [ngModel]="save()?.party?._gold ?? 0"
+              (ngModelChange)="updateGold($event)"
+              min="0"
+            />
+          </div>
+          <div>
+            <label>Steps</label>
+            <input type="number" [value]="steps()" disabled />
+          </div>
+        </div>
+      }
+    </section>
+
+    <section class="panel">
+      <div
+        class="panel-head"
+        (click)="isItemsOpen.set(!isItemsOpen())"
+        style="cursor: pointer"
+      >
+        <div>
+          <p class="eyebrow">Inventory</p>
+          <h2>
+            <span class="chevron">{{ isItemsOpen() ? '▼' : '▶' }}</span>
+            Items &amp; quantities
+          </h2>
+        </div>
+      </div>
+
+      @if (isItemsOpen()) {
+        <div class="inline-form">
+          <input
+            type="search"
+            placeholder="Search by id or name"
+            [ngModel]="itemSearch()"
+            (ngModelChange)="itemSearch.set(($event || '').toString())"
+          />
+          <input
+            type="number"
+            placeholder="Item ID"
+            min="1"
+            [ngModel]="newItemId() ?? ''"
+            (ngModelChange)="newItemId.set(toNumber($event))"
+          />
+          <input
+            type="number"
+            placeholder="Qty"
+            min="0"
+            [ngModel]="newItemQuantity()"
+            (ngModelChange)="newItemQuantity.set(toNumber($event))"
+          />
+          <button type="button" [disabled]="!newItemId() || newItemId()! < 1" (click)="addItem()">Add / Update</button>
+        </div>
+
+        <div class="table" role="table">
+          <div class="row header" role="row">
+            <div>Id</div>
+            <div>Name</div>
+            <div class="qty">Qty</div>
+          </div>
+          @for (item of filteredItems(); track item.id) {
+            <div class="row" role="row">
+              <div>{{ item.id }}</div>
+              <div class="name">{{ item.name ?? 'Unknown item' }}</div>
+              <div class="qty">
+                <input
+                  type="number"
+                  min="0"
+                  [ngModel]="item.quantity"
+                  (ngModelChange)="updateItemQuantity(item.id, $event)"
+                />
+              </div>
+            </div>
+          } @empty {
+            <div class="row empty">No items in this save.</div>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="panel">
+      <div
+        class="panel-head"
+        (click)="isWeaponsOpen.set(!isWeaponsOpen())"
+        style="cursor: pointer"
+      >
+        <div>
+          <p class="eyebrow">Arsenal</p>
+          <h2>
+            <span class="chevron">{{ isWeaponsOpen() ? '▼' : '▶' }}</span>
+            Weapons
+          </h2>
+        </div>
+      </div>
+
+      @if (isWeaponsOpen()) {
+        <div class="inline-form">
+          <input
+            type="search"
+            placeholder="Search by id or name"
+            [ngModel]="weaponSearch()"
+            (ngModelChange)="weaponSearch.set(($event || '').toString())"
+          />
+          <input
+            type="number"
+            placeholder="Weapon ID"
+            min="1"
+            [ngModel]="newWeaponId()"
+            (ngModelChange)="newWeaponId.set(toNumber($event))"
+          />
+          <input
+            type="number"
+            placeholder="Qty"
+            min="0"
+            [ngModel]="newWeaponQuantity()"
+            (ngModelChange)="newWeaponQuantity.set(toNumber($event))"
+          />
+          <button type="button" (click)="addWeapon()">Add / Update</button>
+        </div>
+
+        <div class="table" role="table">
+          <div class="row header" role="row">
+            <div>Id</div>
+            <div>Name</div>
+            <div class="qty">Qty</div>
+          </div>
+          @for (weapon of filteredWeapons(); track weapon.id) {
+            <div class="row" role="row">
+              <div>{{ weapon.id }}</div>
+              <div class="name">{{ weapon.name ?? 'Unknown weapon' }}</div>
+              <div class="qty">
+                <input
+                  type="number"
+                  min="0"
+                  [ngModel]="weapon.quantity"
+                  (ngModelChange)="updateWeaponQuantity(weapon.id, $event)"
+                />
+              </div>
+            </div>
+          } @empty {
+            <div class="row empty">No weapons in this save.</div>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="panel">
+      <div
+        class="panel-head"
+        (click)="isArmorsOpen.set(!isArmorsOpen())"
+        style="cursor: pointer"
+      >
+        <div>
+          <p class="eyebrow">Gear</p>
+          <h2>
+            <span class="chevron">{{ isArmorsOpen() ? '▼' : '▶' }}</span>
+            Armors
+          </h2>
+        </div>
+      </div>
+
+      @if (isArmorsOpen()) {
+        <div class="inline-form">
+          <input
+            type="search"
+            placeholder="Search by id or name"
+            [ngModel]="armorSearch()"
+            (ngModelChange)="armorSearch.set(($event || '').toString())"
+          />
+          <input
+            type="number"
+            placeholder="Armor ID"
+            min="1"
+            [ngModel]="newArmorId()"
+            (ngModelChange)="newArmorId.set(toNumber($event))"
+          />
+          <input
+            type="number"
+            placeholder="Qty"
+            min="0"
+            [ngModel]="newArmorQuantity()"
+            (ngModelChange)="newArmorQuantity.set(toNumber($event))"
+          />
+          <button type="button" (click)="addArmor()">Add / Update</button>
+        </div>
+
+        <div class="table" role="table">
+          <div class="row header" role="row">
+            <div>Id</div>
+            <div>Name</div>
+            <div class="qty">Qty</div>
+          </div>
+          @for (armor of filteredArmors(); track armor.id) {
+            <div class="row" role="row">
+              <div>{{ armor.id }}</div>
+              <div class="name">{{ armor.name ?? 'Unknown armor' }}</div>
+              <div class="qty">
+                <input
+                  type="number"
+                  min="0"
+                  [ngModel]="armor.quantity"
+                  (ngModelChange)="updateArmorQuantity(armor.id, $event)"
+                />
+              </div>
+            </div>
+          } @empty {
+            <div class="row empty">No armors in this save.</div>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="panel">
+      <div
+        class="panel-head"
+        (click)="isVariablesOpen.set(!isVariablesOpen())"
+        style="cursor: pointer"
+      >
+        <div>
+          <p class="eyebrow">Progression</p>
+          <h2>
+            <span class="chevron">{{ isVariablesOpen() ? '▼' : '▶' }}</span>
+            Variables
+          </h2>
+        </div>
+      </div>
+      @if (isVariablesOpen()) {
+        <div class="table" role="table">
+          <div class="row header" role="row">
+            <div>Id</div>
+            <div>Name</div>
+            <div class="qty">Value</div>
+          </div>
+          @for (variable of variables(); track variable.id) {
+            <div class="row" role="row">
+              <div>{{ variable.id }}</div>
+              <div class="name">{{ variable.name ?? 'Variable' }}</div>
+              <div class="qty">
+                <input
+                  type="number"
+                  [ngModel]="variable.value"
+                  (ngModelChange)="updateVariable(variable.id, $event)"
+                />
+              </div>
+            </div>
+          } @empty {
+            <div class="row empty">No variables found.</div>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="panel">
+      <div
+        class="panel-head"
+        (click)="isActorsOpen.set(!isActorsOpen())"
+        style="cursor: pointer"
+      >
+        <div>
+          <p class="eyebrow">Actors</p>
+          <h2>
+            <span class="chevron">{{ isActorsOpen() ? '▼' : '▶' }}</span>
+            Party &amp; bench
+          </h2>
+        </div>
+      </div>
+      @if (isActorsOpen()) {
+        <div class="actor-grid">
+          @for (actor of actors(); track actor.id) {
+            <article class="actor-card">
+              <div class="card-head">
+                <div>
+                  <p class="eyebrow">Actor {{ actor.id }}</p>
+                  <h3>{{ actor.name || 'Unknown' }}</h3>
+                </div>
+                <div class="pill">Class {{ actor.classId || '—' }}</div>
+              </div>
+              <div class="stat-grid">
+                <label>
+                  <span>Level</span>
+                  <input
+                    type="number"
+                    min="1"
+                    [ngModel]="actor.level"
+                    (ngModelChange)="updateActorField(actor.id, 'level', $event)"
+                  />
+                </label>
+                <label>
+                  <span>HP</span>
+                  <input
+                    type="number"
+                    min="0"
+                    [ngModel]="actor.hp"
+                    (ngModelChange)="updateActorField(actor.id, 'hp', $event)"
+                  />
+                </label>
+                <label>
+                  <span>MP</span>
+                  <input
+                    type="number"
+                    min="0"
+                    [ngModel]="actor.mp"
+                    (ngModelChange)="updateActorField(actor.id, 'mp', $event)"
+                  />
+                </label>
+                <label>
+                  <span>TP</span>
+                  <input
+                    type="number"
+                    min="0"
+                    [ngModel]="actor.tp"
+                    (ngModelChange)="updateActorField(actor.id, 'tp', $event)"
+                  />
+                </label>
+                <label>
+                  <span>Exp (class {{ actor.classId || '?' }})</span>
+                  <input
+                    type="number"
+                    min="0"
+                    [ngModel]="actor.exp"
+                    (ngModelChange)="updateActorField(actor.id, 'exp', $event)"
+                  />
+                </label>
+              </div>
+              <p class="small-note">Loaded exp map: {{ actor.expMap | json }}</p>
+              <div class="stat-grid param-plus">
+                <label>
+                  <span>MHP (bonus)</span>
+                  <input
+                    type="number"
+                    [ngModel]="actor.paramPlus[0]"
+                    (ngModelChange)="updateActorParam(actor.id, 0, $event)"
+                  />
+                </label>
+                <label>
+                  <span>MMP (bonus)</span>
+                  <input
+                    type="number"
+                    [ngModel]="actor.paramPlus[1]"
+                    (ngModelChange)="updateActorParam(actor.id, 1, $event)"
+                  />
+                </label>
+                <label>
+                  <span>ATK</span>
+                  <input
+                    type="number"
+                    [ngModel]="actor.paramPlus[2]"
+                    (ngModelChange)="updateActorParam(actor.id, 2, $event)"
+                  />
+                </label>
+                <label>
+                  <span>DEF</span>
+                  <input
+                    type="number"
+                    [ngModel]="actor.paramPlus[3]"
+                    (ngModelChange)="updateActorParam(actor.id, 3, $event)"
+                  />
+                </label>
+                <label>
+                  <span>MAT</span>
+                  <input
+                    type="number"
+                    [ngModel]="actor.paramPlus[4]"
+                    (ngModelChange)="updateActorParam(actor.id, 4, $event)"
+                  />
+                </label>
+                <label>
+                  <span>MDF</span>
+                  <input
+                    type="number"
+                    [ngModel]="actor.paramPlus[5]"
+                    (ngModelChange)="updateActorParam(actor.id, 5, $event)"
+                  />
+                </label>
+                <label>
+                  <span>AGI</span>
+                  <input
+                    type="number"
+                    [ngModel]="actor.paramPlus[6]"
+                    (ngModelChange)="updateActorParam(actor.id, 6, $event)"
+                  />
+                </label>
+                <label>
+                  <span>LUK</span>
+                  <input
+                    type="number"
+                    [ngModel]="actor.paramPlus[7]"
+                    (ngModelChange)="updateActorParam(actor.id, 7, $event)"
+                  />
+                </label>
+              </div>
+              @if (actor.mastery.length > 0) {
+                <div class="mastery-inline">
+                  <button class="ghost small" type="button" (click)="openMastery(actor.id)">
+                    Modify Skill Mastery ({{ actor.mastery.length }})
+                  </button>
+                </div>
+              }
+            </article>
+          } @empty {
+            <p class="status">No actors found in this save.</p>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">Bulk</p>
+          <h2>Global Skill Mastery</h2>
+          <p class="small-note">
+            Apply the same level, uses, and next-level threshold to every mastery entry for every actor.
+          </p>
+        </div>
+      </div>
+      @if (globalMasteryDefaults(); as defaults) {
+        <div class="bulk-master global-bulk">
+          <div class="bulk-field">
+            <label>Set Level (default max {{ defaults.level }})</label>
+            <input
+              type="number"
+              min="0"
+              [ngModel]="masteryGlobalLevel() ?? defaults.level"
+              (ngModelChange)="masteryGlobalLevel.set(toNumber($event))"
+            />
+          </div>
+          <div class="bulk-field">
+            <label>Set Uses (default max {{ defaults.uses }})</label>
+            <input
+              type="number"
+              min="0"
+              [ngModel]="masteryGlobalUses() ?? defaults.uses"
+              (ngModelChange)="masteryGlobalUses.set(toNumber($event))"
+            />
+          </div>
+          <div class="bulk-field">
+            <label>Uses to Next Level (default max {{ defaults.threshold }})</label>
+            <input
+              type="number"
+              min="0"
+              [ngModel]="masteryGlobalThreshold() ?? defaults.threshold"
+              (ngModelChange)="masteryGlobalThreshold.set(toNumber($event))"
+            />
+          </div>
+          <div class="bulk-actions">
+            <button class="ghost small" type="button" (click)="refreshGlobalDefaults()">Get Latest Max</button>
+            <button class="ghost small" type="button" (click)="applyGlobalMastery()">Set All Skills</button>
+          </div>
+        </div>
+      }
+    </section>
+
+    @if (modalActor(); as activeActor) {
+      <div class="overlay" (click)="closeMastery()">
+          <div class="overlay-panel" (click)="$event.stopPropagation()">
+            <div class="overlay-head">
+              <div>
+                <p class="eyebrow">Actor {{ activeActor.id }}</p>
+                <h3>Skill Mastery</h3>
+                <p class="small-note">
+                  Adjust levels, uses, and the next-level threshold (target uses before leveling up).
+                </p>
+              </div>
+              <button class="ghost small" type="button" (click)="closeMastery()">Close</button>
+            </div>
+            <div class="bulk-master">
+              <div class="bulk-field">
+                <label>Set Level</label>
+                <input type="number" min="0" [ngModel]="masteryAllLevel()" (ngModelChange)="masteryAllLevel.set(toNumber($event))" />
+              </div>
+              <div class="bulk-field">
+                <label>Set Uses</label>
+                <input type="number" min="0" [ngModel]="masteryAllUses()" (ngModelChange)="masteryAllUses.set(toNumber($event))" />
+              </div>
+              <div class="bulk-field">
+                <label>Set Uses to Next Level</label>
+                <input
+                  type="number"
+                  min="0"
+                  [ngModel]="masteryAllThreshold()"
+                  (ngModelChange)="masteryAllThreshold.set(toNumber($event))"
+                />
+              </div>
+              <button class="ghost small" type="button" (click)="applyMasteryAll()">Set All</button>
+            </div>
+            <div class="table mastery-table" role="table">
+              <div class="row header" role="row">
+              <div style="flex: 2">Skill</div>
+              <div>Current Level</div>
+              <div>Current Uses</div>
+              <div>Uses to Next Level</div>
+            </div>
+            @for (skill of activeActor.mastery; track skill.skillId) {
+              <div class="row" role="row">
+                <div style="flex: 2; font-size: 0.9em;" title="ID: {{skill.skillId}}">
+                  {{ skill.name }}
+                </div>
+                <div class="qty">
+                  <input
+                    type="number"
+                    min="0"
+                    [ngModel]="skill.level"
+                    (ngModelChange)="updateMastery(activeActor.id, skill.skillId, 'level', $event)"
+                  />
+                </div>
+                <div class="qty">
+                  <input
+                    type="number"
+                    min="0"
+                    [ngModel]="skill.uses"
+                    (ngModelChange)="updateMastery(activeActor.id, skill.skillId, 'uses', $event)"
+                  />
+                </div>
+                <div class="qty">
+                  <input
+                    type="number"
+                    min="0"
+                    [ngModel]="skill.max"
+                    (ngModelChange)="updateMastery(activeActor.id, skill.skillId, 'max', $event)"
+                  />
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  } @else {
+    <section class="placeholder">
+      <p>Load a <code>.rpgsave</code> file to begin.</p>
+    </section>
+  }
+</div>
