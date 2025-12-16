@@ -374,32 +374,7 @@ export class SaveFileService {
     });
   }
 
-  updateActorMastery(
-    actorId: number,
-    skillId: number,
-    field: '_skillMasteryLevels' | '_skillMasteryUses' | '_skillMasteryUsageMax',
-    value: number
-  ) {
-    if (!Number.isFinite(skillId) || skillId <= 0) return;
-    this.saveData.update(current => {
-      if (!current?.actors?._data?.['@a']) return current;
-      const updated = structuredClone(current);
-      const list = updated.actors!._data!['@a']!;
-      const index = list.findIndex(a => a?._actorId === actorId);
-
-      if (index === -1 || !list[index]) return current;
-
-      const actor = list[index]!;
-      const dict = actor[field] ?? {};
-      dict[skillId] = Math.max(0, Math.round(value));
-      actor[field] = dict;
-
-      list[index] = actor;
-      return updated;
-    });
-  }
-
-  updateByPath(path: (string | number)[], value: unknown) {
+  public updateByPath(path: (string | number)[], value: unknown) {
     this.saveData.update(current => {
       if (!current) return current;
       const updated: any = structuredClone(current);

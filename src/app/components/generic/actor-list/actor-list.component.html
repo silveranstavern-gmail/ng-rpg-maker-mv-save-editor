@@ -1,0 +1,86 @@
+<section class="panel">
+  <div class="panel-head" (click)="isOpen.set(!isOpen())" style="cursor: pointer">
+    <div>
+      <p class="eyebrow">Actors</p>
+      <h2>
+        <span class="chevron">{{ isOpen() ? '▼' : '▶' }}</span>
+        Party &amp; bench
+      </h2>
+    </div>
+  </div>
+
+  @if (isOpen()) {
+    <div class="actor-grid">
+      @for (actor of actors(); track actor.id) {
+        <article class="actor-card">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Actor {{ actor.id }}</p>
+              <h3>{{ actor.name || 'Unknown' }}</h3>
+            </div>
+            <div class="pill">Class {{ actor.classId || '—' }}</div>
+          </div>
+          <div class="stat-grid">
+            <label>
+              <span>Level</span>
+              <input type="number" min="1" [ngModel]="actor.level" (ngModelChange)="updateActorField(actor.id, 'level', $event)" />
+            </label>
+            <label>
+              <span>HP</span>
+              <input type="number" min="0" [ngModel]="actor.hp" (ngModelChange)="updateActorField(actor.id, 'hp', $event)" />
+            </label>
+            <label>
+              <span>MP</span>
+              <input type="number" min="0" [ngModel]="actor.mp" (ngModelChange)="updateActorField(actor.id, 'mp', $event)" />
+            </label>
+            <label>
+              <span>TP</span>
+              <input type="number" min="0" [ngModel]="actor.tp" (ngModelChange)="updateActorField(actor.id, 'tp', $event)" />
+            </label>
+            <label>
+              <span>Exp (class {{ actor.classId || '?' }})</span>
+              <input type="number" min="0" [ngModel]="actor.exp" (ngModelChange)="updateActorField(actor.id, 'exp', $event)" />
+            </label>
+          </div>
+          <p class="small-note">Loaded exp map: {{ actor.expMap | json }}</p>
+          <div class="stat-grid param-plus">
+            <label>
+              <span>MHP (bonus)</span>
+              <input type="number" [ngModel]="actor.paramPlus[0]" (ngModelChange)="updateActorParam(actor.id, 0, $event)" />
+            </label>
+            <label>
+              <span>MMP (bonus)</span>
+              <input type="number" [ngModel]="actor.paramPlus[1]" (ngModelChange)="updateActorParam(actor.id, 1, $event)" />
+            </label>
+            <label>
+              <span>ATK</span>
+              <input type="number" [ngModel]="actor.paramPlus[2]" (ngModelChange)="updateActorParam(actor.id, 2, $event)" />
+            </label>
+            <label>
+              <span>DEF</span>
+              <input type="number" [ngModel]="actor.paramPlus[3]" (ngModelChange)="updateActorParam(actor.id, 3, $event)" />
+            </label>
+            <label>
+              <span>MAT</span>
+              <input type="number" [ngModel]="actor.paramPlus[4]" (ngModelChange)="updateActorParam(actor.id, 4, $event)" />
+            </label>
+            <label>
+              <span>MDF</span>
+              <input type="number" [ngModel]="actor.paramPlus[5]" (ngModelChange)="updateActorParam(actor.id, 5, $event)" />
+            </label>
+            <label>
+              <span>AGI</span>
+              <input type="number" [ngModel]="actor.paramPlus[6]" (ngModelChange)="updateActorParam(actor.id, 6, $event)" />
+            </label>
+            <label>
+              <span>LUK</span>
+              <input type="number" [ngModel]="actor.paramPlus[7]" (ngModelChange)="updateActorParam(actor.id, 7, $event)" />
+            </label>
+          </div>
+        </article>
+      } @empty {
+        <p class="status">No actors found in this save.</p>
+      }
+    </div>
+  }
+</section>

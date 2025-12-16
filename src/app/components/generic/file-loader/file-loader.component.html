@@ -1,0 +1,77 @@
+<header class="hero">
+  <div>
+    <p class="eyebrow">RPG Maker MV / .rpgsave</p>
+    <h1>RPG Save Editor &amp; Patcher</h1>
+    <p class="lede">
+      Load a save, tweak party stats, items, and actors, then export a patched
+      <code>.rpgsave</code> back to disk. All parsing happens in your browser.
+    </p>
+
+    <div class="file-grid">
+      <label class="upload">
+        <span>Select .rpgsave</span>
+        <input type="file" accept=".rpgsave,.txt" (change)="onSaveFileSelected($event)" />
+      </label>
+      <label class="upload">
+        <span>Import save from JSON</span>
+        <input type="file" accept=".json" (change)="onSaveJsonSelected($event)" />
+      </label>
+    </div>
+
+    <div class="data-dir">
+      <div class="toggle-row">
+        <label class="check">
+          <input type="checkbox" [ngModel]="importItems()" (ngModelChange)="importItems.set(!!$event)" />
+          <span>Items.json</span>
+        </label>
+        <label class="check">
+          <input type="checkbox" [ngModel]="importWeapons()" (ngModelChange)="importWeapons.set(!!$event)" />
+          <span>Weapons.json</span>
+        </label>
+        <label class="check">
+          <input type="checkbox" [ngModel]="importArmors()" (ngModelChange)="importArmors.set(!!$event)" />
+          <span>Armors.json</span>
+        </label>
+        <label class="check">
+          <input type="checkbox" [ngModel]="importSkills()" (ngModelChange)="importSkills.set(!!$event)" />
+          <span>Skills.json</span>
+        </label>
+        <label class="check">
+          <input type="checkbox" [ngModel]="importSystem()" (ngModelChange)="importSystem.set(!!$event)" />
+          <span>System.json</span>
+        </label>
+      </div>
+      <label class="upload wide">
+        <span>Import www/data folder</span>
+        <input type="file" webkitdirectory multiple (change)="onDataDirSelected($event)" />
+      </label>
+      @if (dataDirLabel()) {
+        <p class="status ghost">Folder: {{ dataDirLabel() }}</p>
+      }
+      @if (dataDirStatus()) {
+        <p class="status ghost">{{ dataDirStatus() }}</p>
+      }
+    </div>
+
+    <div class="sample-actions">
+      <button class="ghost" type="button" (click)="loadSampleData()">Load sample data</button>
+      <button class="ghost" type="button" (click)="clearData()">Clear data</button>
+    </div>
+
+    @if (fileLabel()) {
+      <p class="status success">Loaded {{ fileLabel() }}</p>
+    }
+    @if (error()) {
+      <p class="status error">{{ error() }}</p>
+    }
+  </div>
+
+  <div class="cta-stack">
+    <button class="cta" type="button" [disabled]="!hasSave()" (click)="downloadSave()">
+      Download updated .rpgsave file
+    </button>
+    <button class="ghost" type="button" [disabled]="!hasSave()" (click)="downloadRawJson()">
+      Download updated raw JSON
+    </button>
+  </div>
+</header>

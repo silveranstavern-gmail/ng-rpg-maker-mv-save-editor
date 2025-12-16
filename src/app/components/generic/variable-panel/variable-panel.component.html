@@ -1,0 +1,32 @@
+<section class="panel">
+  <div class="panel-head" (click)="isOpen.set(!isOpen())" style="cursor: pointer">
+    <div>
+      <p class="eyebrow">Progression</p>
+      <h2>
+        <span class="chevron">{{ isOpen() ? '▼' : '▶' }}</span>
+        Variables
+      </h2>
+    </div>
+  </div>
+
+  @if (isOpen()) {
+    <div class="table" role="table">
+      <div class="row header" role="row">
+        <div>Id</div>
+        <div>Name</div>
+        <div class="qty">Value</div>
+      </div>
+      @for (variable of variables(); track variable.id) {
+        <div class="row" role="row">
+          <div>{{ variable.id }}</div>
+          <div class="name">{{ variable.name ?? 'Variable' }}</div>
+          <div class="qty">
+            <input type="number" [ngModel]="variable.value" (ngModelChange)="updateVariable(variable.id, $event)" />
+          </div>
+        </div>
+      } @empty {
+        <div class="row empty">No variables found.</div>
+      }
+    </div>
+  }
+</section>

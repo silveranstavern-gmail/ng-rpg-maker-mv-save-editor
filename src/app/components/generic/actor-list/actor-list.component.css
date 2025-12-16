@@ -1,0 +1,122 @@
+:host {
+  display: block;
+}
+
+.panel {
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(18, 20, 33, 0.9), rgba(12, 13, 20, 0.92));
+  backdrop-filter: blur(8px);
+  color: #e7edff;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 11px;
+  margin: 0 0 4px;
+  color: #a9b3d7;
+}
+
+h2 {
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.pill {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #d1d8ff;
+  font-size: 13px;
+}
+
+.actor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.actor-card {
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: radial-gradient(circle at 20% 20%, rgba(69, 90, 255, 0.08), rgba(18, 20, 33, 0.9));
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.22);
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.actor-card h3 {
+  margin: 4px 0;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.stat-grid.param-plus {
+  margin-top: 14px;
+}
+
+.stat-grid input {
+  width: 100%;
+}
+
+label {
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #b8c1e0;
+}
+
+input[type='number'] {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: #f1f4ff;
+  transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+input[type='number']:focus {
+  outline: none;
+  border-color: rgba(255, 226, 106, 0.6);
+  box-shadow: 0 0 0 3px rgba(255, 226, 106, 0.15);
+  transform: translateY(-1px);
+}
+
+.small-note {
+  margin-top: 8px;
+  color: #96a0c0;
+  font-size: 12px;
+  word-break: break-word;
+}
+
+.status {
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  color: #c4c9dc;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.02);
+}

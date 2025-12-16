@@ -1,0 +1,56 @@
+<section class="panel">
+  <div class="panel-head" (click)="isOpen.set(!isOpen())" style="cursor: pointer">
+    <div>
+      <p class="eyebrow">Inventory</p>
+      <h2>
+        <span class="chevron">{{ isOpen() ? '▼' : '▶' }}</span>
+        {{ title() }}
+      </h2>
+    </div>
+  </div>
+
+  @if (isOpen()) {
+    <div class="inline-form">
+      <input
+        type="search"
+        placeholder="Search by id or name"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="updateSearch($event)"
+      />
+      <input
+        type="number"
+        placeholder="ID"
+        min="1"
+        [ngModel]="newId() ?? ''"
+        (ngModelChange)="newId.set(toNumber($event))"
+      />
+      <input
+        type="number"
+        placeholder="Qty"
+        min="0"
+        [ngModel]="newQuantity()"
+        (ngModelChange)="newQuantity.set(toNumber($event))"
+      />
+      <button type="button" [disabled]="!newId() || newId()! < 1" (click)="addItem()">Add / Update</button>
+    </div>
+
+    <div class="table" role="table">
+      <div class="row header" role="row">
+        <div>Id</div>
+        <div>Name</div>
+        <div class="qty">Qty</div>
+      </div>
+      @for (item of filteredRows(); track item.id) {
+        <div class="row" role="row">
+          <div>{{ item.id }}</div>
+          <div class="name">{{ item.name ?? 'Unknown' }}</div>
+          <div class="qty">
+            <input type="number" min="0" [ngModel]="item.quantity" (ngModelChange)="updateQuantity(item.id, $event)" />
+          </div>
+        </div>
+      } @empty {
+        <div class="row empty">No entries in this save.</div>
+      }
+    </div>
+  }
+</section>

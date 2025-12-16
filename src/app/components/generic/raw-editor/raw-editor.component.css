@@ -1,0 +1,127 @@
+:host {
+  display: block;
+}
+
+.panel {
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(18, 20, 33, 0.9), rgba(12, 13, 20, 0.92));
+  backdrop-filter: blur(8px);
+  color: #e7edff;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 11px;
+  margin: 0 0 4px;
+  color: #a9b3d7;
+}
+
+h2 {
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.raw-panel {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.check {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 13px;
+  color: #dbe2ff;
+}
+
+.ghost {
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  color: #f1f4ff;
+  cursor: pointer;
+}
+
+.ghost:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.status {
+  margin: 6px 0 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  display: inline-block;
+}
+
+.status.ghost {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+}
+
+.raw-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.raw-tree {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  max-height: 480px;
+  overflow: auto;
+}
+
+.raw-tree details {
+  padding-left: 6px;
+}
+
+.raw-tree summary {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+}
+
+.node-key {
+  color: #ffd479;
+  font-weight: 600;
+}
+
+.node-type {
+  color: #7bd8ff;
+  font-size: 12px;
+}
+
+.node-value {
+  color: #c8e7ff;
+}
+
+.node-value input {
+  min-width: 120px;
+}
+
+.children {
+  margin-left: 16px;
+  border-left: 1px dashed rgba(255, 255, 255, 0.08);
+  padding-left: 12px;
+}

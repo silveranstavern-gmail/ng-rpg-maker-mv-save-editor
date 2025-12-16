@@ -1,0 +1,138 @@
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">Bulk</p>
+      <h2>Global Skill Mastery</h2>
+      <p class="small-note">
+        Apply the same level, uses, and next-level threshold to every mastery entry for every actor.
+      </p>
+    </div>
+  </div>
+
+  @if (globalMasteryDefaults(); as defaults) {
+    <div class="bulk-master global-bulk">
+      <div class="bulk-field">
+        <label>Set Level (default max {{ defaults.level }})</label>
+        <input
+          type="number"
+          min="0"
+          [ngModel]="masteryGlobalLevel() ?? defaults.level"
+          (ngModelChange)="masteryGlobalLevel.set(toNumber($event))"
+        />
+      </div>
+      <div class="bulk-field">
+        <label>Set Uses (default max {{ defaults.uses }})</label>
+        <input
+          type="number"
+          min="0"
+          [ngModel]="masteryGlobalUses() ?? defaults.uses"
+          (ngModelChange)="masteryGlobalUses.set(toNumber($event))"
+        />
+      </div>
+      <div class="bulk-field">
+        <label>Uses to Next Level (default max {{ defaults.threshold }})</label>
+        <input
+          type="number"
+          min="0"
+          [ngModel]="masteryGlobalThreshold() ?? defaults.threshold"
+          (ngModelChange)="masteryGlobalThreshold.set(toNumber($event))"
+        />
+      </div>
+      <div class="bulk-actions">
+        <button class="ghost small" type="button" (click)="refreshGlobalDefaults()">Get Latest Max</button>
+        <button class="ghost small" type="button" (click)="applyGlobalMastery()">Set All Skills</button>
+      </div>
+    </div>
+  }
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">Wormskull</p>
+      <h2>Mastery per Actor</h2>
+    </div>
+  </div>
+
+  <div class="actor-grid">
+    @for (actor of actors(); track actor.id) {
+      <article class="actor-card">
+        <div class="card-head">
+          <div>
+            <p class="eyebrow">Actor {{ actor.id }}</p>
+            <h3>{{ actor.name || 'Unknown' }}</h3>
+          </div>
+          <div class="pill">{{ actor.mastery.length }} skills</div>
+        </div>
+        <div class="mastery-inline">
+          <button class="ghost small" type="button" (click)="openMastery(actor.id)">
+            Modify Skill Mastery
+          </button>
+        </div>
+      </article>
+    } @empty {
+      <p class="status">No mastery data found in this save.</p>
+    }
+  </div>
+</section>
+
+@if (modalActor(); as activeActor) {
+  <div class="overlay" (click)="closeMastery()">
+    <div class="overlay-panel" (click)="$event.stopPropagation()">
+      <div class="overlay-head">
+        <div>
+          <p class="eyebrow">Actor {{ activeActor.id }}</p>
+          <h3>Skill Mastery</h3>
+          <p class="small-note">
+            Adjust levels, uses, and the next-level threshold (target uses before leveling up).
+          </p>
+        </div>
+        <button class="ghost small" type="button" (click)="closeMastery()">Close</button>
+      </div>
+      <div class="bulk-master">
+        <div class="bulk-field">
+          <label>Set Level</label>
+          <input type="number" min="0" [ngModel]="masteryAllLevel()" (ngModelChange)="masteryAllLevel.set(toNumber($event))" />
+        </div>
+        <div class="bulk-field">
+          <label>Set Uses</label>
+          <input type="number" min="0" [ngModel]="masteryAllUses()" (ngModelChange)="masteryAllUses.set(toNumber($event))" />
+        </div>
+        <div class="bulk-field">
+          <label>Set Uses to Next Level</label>
+          <input
+            type="number"
+            min="0"
+            [ngModel]="masteryAllThreshold()"
+            (ngModelChange)="masteryAllThreshold.set(toNumber($event))"
+          />
+        </div>
+        <button class="ghost small" type="button" (click)="applyMasteryAll()">Set All</button>
+      </div>
+      <div class="table mastery-table" role="table">
+        <div class="row header" role="row">
+          <div style="flex: 2">Skill</div>
+          <div>Current Level</div>
+          <div>Current Uses</div>
+          <div>Uses to Next Level</div>
+        </div>
+        @for (skill of activeActor.mastery; track skill.skillId) {
+          <div class="row" role="row">
+            <div style="flex: 2; font-size: 0.9em;" title="ID: {{ skill.skillId }}">
+              {{ skill.name }}
+            </div>
+            <div class="qty">
+              <input type="number" min="0" [ngModel]="skill.level" (ngModelChange)="updateMastery(activeActor.id, skill.skillId, 'level', $event)" />
+            </div>
+            <div class="qty">
+              <input type="number" min="0" [ngModel]="skill.uses" (ngModelChange)="updateMastery(activeActor.id, skill.skillId, 'uses', $event)" />
+            </div>
+            <div class="qty">
+              <input type="number" min="0" [ngModel]="skill.max" (ngModelChange)="updateMastery(activeActor.id, skill.skillId, 'max', $event)" />
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

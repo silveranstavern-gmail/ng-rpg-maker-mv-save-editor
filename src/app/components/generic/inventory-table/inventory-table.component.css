@@ -1,0 +1,126 @@
+:host {
+  display: block;
+}
+
+.panel {
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(18, 20, 33, 0.9), rgba(12, 13, 20, 0.92));
+  backdrop-filter: blur(8px);
+  color: #e7edff;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 11px;
+  margin: 0 0 4px;
+  color: #a9b3d7;
+}
+
+h2 {
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.inline-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.inline-form button {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
+  color: #f1f1f1;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.inline-form button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.2);
+}
+
+input[type='number'],
+input[type='text'],
+input[type='search'] {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: #f1f4ff;
+  transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+input[type='number']:focus,
+input[type='text']:focus,
+input[type='search']:focus {
+  outline: none;
+  border-color: rgba(255, 226, 106, 0.6);
+  box-shadow: 0 0 0 3px rgba(255, 226, 106, 0.15);
+  transform: translateY(-1px);
+}
+
+.table {
+  margin-top: 12px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 0.6fr 1.8fr 0.8fr;
+  gap: 10px;
+  padding: 10px 12px;
+  align-items: center;
+}
+
+.row:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.row:not(.header):hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.row.header {
+  background: rgba(255, 255, 255, 0.06);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.row.empty {
+  text-align: center;
+  justify-content: center;
+  color: #9ea6c3;
+}
+
+.row .name {
+  font-weight: 600;
+}
+
+.row .qty {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.row .qty input {
+  width: 100px;
+}

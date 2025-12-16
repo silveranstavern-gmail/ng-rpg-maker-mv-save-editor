@@ -1,0 +1,72 @@
+:host {
+  display: block;
+}
+
+.panel {
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(18, 20, 33, 0.9), rgba(12, 13, 20, 0.92));
+  backdrop-filter: blur(8px);
+  color: #e7edff;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 11px;
+  margin: 0 0 4px;
+  color: #a9b3d7;
+}
+
+h2 {
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.pill {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #d1d8ff;
+  font-size: 13px;
+}
+
+.controls-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+label {
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #b8c1e0;
+}
+
+input[type='number'] {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: #f1f4ff;
+  transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+input[type='number']:focus {
+  outline: none;
+  border-color: rgba(255, 226, 106, 0.6);
+  box-shadow: 0 0 0 3px rgba(255, 226, 106, 0.15);
+  transform: translateY(-1px);
+}

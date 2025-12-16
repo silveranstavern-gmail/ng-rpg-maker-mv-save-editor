@@ -1,0 +1,25 @@
+<section class="panel">
+  <div class="panel-head" (click)="isOpen.set(!isOpen())" style="cursor: pointer">
+    <div>
+      <p class="eyebrow">Party</p>
+      <h2>
+        <span class="chevron">{{ isOpen() ? '▼' : '▶' }}</span>
+        Economy
+      </h2>
+    </div>
+    <div class="pill">Steps: {{ steps() }}</div>
+  </div>
+
+  @if (isOpen()) {
+    <div class="controls-row">
+      <div>
+        <label>Gold</label>
+        <input type="number" [ngModel]="gold()" (ngModelChange)="updateGold($event)" min="0" />
+      </div>
+      <div>
+        <label>Steps</label>
+        <input type="number" [value]="steps()" disabled />
+      </div>
+    </div>
+  }
+</section>

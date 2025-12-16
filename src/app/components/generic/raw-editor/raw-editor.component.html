@@ -1,0 +1,67 @@
+<section class="panel raw-panel">
+  <div class="panel-head" (click)="isOpen.set(!isOpen())" style="cursor: pointer">
+    <div>
+      <p class="eyebrow">Advanced</p>
+      <h2>
+        <span class="chevron">{{ isOpen() ? '▼' : '▶' }}</span>
+        Raw JSON editor
+      </h2>
+    </div>
+    <div (click)="$event.stopPropagation()">
+      <label class="check">
+        <input type="checkbox" [ngModel]="showRaw()" (ngModelChange)="showRaw.set(!!$event)" />
+        <span>Show raw JSON</span>
+      </label>
+    </div>
+  </div>
+
+  @if (isOpen()) {
+    <div class="raw-toolbar">
+      <p class="status ghost">Double-click a value to edit. Numbers, booleans, null, and objects are parsed.</p>
+      <button type="button" class="ghost" [disabled]="!save()" (click)="downloadRawJson()">Download raw JSON</button>
+    </div>
+
+    @if (showRaw()) {
+      @if (rawRoot(); as root) {
+        <div class="raw-tree">
+          <ng-container *ngTemplateOutlet="rawNode; context: { $implicit: root }"></ng-container>
+        </div>
+      } @else {
+        <p class="status ghost">No save data loaded yet.</p>
+      }
+    }
+  }
+
+  <ng-template #rawNode let-node>
+    <details [open]="node.path.length === 0">
+      <summary>
+        <span class="node-key">{{ node.key }}</span>
+        @if (!node.isPrimitive) {
+          <span class="node-type">{{ node.isArray ? '[ ]' : '{ }' }}</span>
+        } @else {
+          <span class="node-value" (dblclick)="startEdit(node)">
+            @if (isEditing(node)) {
+              <input
+                type="text"
+                [ngModel]="editingValue()"
+                (ngModelChange)="editingValue.set($event)"
+                (keyup.enter)="commitEdit(node)"
+                (keyup.escape)="cancelEdit()"
+                (blur)="commitEdit(node)"
+              />
+            } @else {
+              {{ formatValue(node.value) }}
+            }
+          </span>
+        }
+      </summary>
+      @if (node.children.length) {
+        <div class="children">
+          @for (child of node.children; track trackNode(child)) {
+            <ng-container *ngTemplateOutlet="rawNode; context: { $implicit: child }"></ng-container>
+          }
+        </div>
+      }
+    </details>
+  </ng-template>
+</section>
